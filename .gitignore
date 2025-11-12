@@ -1,0 +1,15 @@
+# Dependencies (in all folders)
+**/node_modules
+
+# Build output (in all folders)
+**/dist
+
+# Secrets file (CRITICAL)
+.env
+
+# Logs
+npm-debug.log*
+yarn-error.log
+
+# Vite caches
+.vite-temp/

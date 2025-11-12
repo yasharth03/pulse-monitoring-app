@@ -1,0 +1,70 @@
+services:
+  # 1. The React Frontend Service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173" 
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules 
+    environment:
+      - WDS_SOCKET_PORT=5173 
+    depends_on:
+      - api
+    networks:
+      - pulse-net
+
+  # 2. The API Service
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./api/src:/app/src 
+    environment:
+      - PORT=${PORT}
+      - MONGO_URL=${MONGO_URL}
+    depends_on:
+      - mongo
+    networks:
+      - pulse-net
+    command: npm run dev 
+
+  # 3. The Worker Service (NEW!)
+  worker:
+    build:
+      context: ./worker
+      dockerfile: Dockerfile
+    volumes:
+      - ./worker/src:/app/src
+    environment:
+      - MONGO_URL=${MONGO_URL}
+    depends_on:
+      - mongo
+    networks:
+      - pulse-net
+    command: npm run dev
+
+  # 4. The MongoDB Database Service
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASS}
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - pulse-net
+
+networks:
+  pulse-net:
+    driver: bridge
+
+volumes:
+  mongo-data:
